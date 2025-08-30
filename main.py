@@ -241,7 +241,7 @@ class MatchView(View):
 
         for i, pair in enumerate(pairs):
             role = roles[i % len(roles)]
-            if random.choice([True, False]):ㅍㅏ일 어어
+            if random.choice([True, False]):
                 team1.append((pair[0][0], pair[0][1], role))
                 team2.append((pair[1][0], pair[1][1], role))
             else:
