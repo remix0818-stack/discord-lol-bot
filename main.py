@@ -2,6 +2,13 @@ import discord
 from discord.ext import commands
 from discord.ui import View, Button, Modal, TextInput
 import random
+import os
+from dotenv import load_dotenv
+import logging
+
+# 로깅 설정
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 # .env 파일 로드
 load_dotenv()
@@ -234,7 +241,7 @@ class MatchView(View):
 
         for i, pair in enumerate(pairs):
             role = roles[i % len(roles)]
-            if random.choice([True, False]):
+            if random.choice([True, False]):ㅍㅏ일 어어
                 team1.append((pair[0][0], pair[0][1], role))
                 team2.append((pair[1][0], pair[1][1], role))
             else:
@@ -275,7 +282,8 @@ class MatchView(View):
 
 @bot.event
 async def on_ready():
-    print(f"{bot.user} 봇이 준비되었습니다.")
+    logger.info(f"{bot.user} 봇이 준비되었습니다.")
+    logger.info(f"봇이 {len(bot.guilds)}개의 서버에서 실행 중입니다.")
 
 
 @bot.command()
