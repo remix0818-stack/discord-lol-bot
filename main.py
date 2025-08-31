@@ -1,10 +1,11 @@
 import discord
-from discord.ext import commands
+from discord.ext import commands, tasks
 from discord.ui import View, Button, Modal, TextInput
 import random
 import os
 from dotenv import load_dotenv
 import logging
+import asyncio
 
 # 로깅 설정
 logging.basicConfig(level=logging.INFO)
@@ -21,6 +22,28 @@ if not TOKEN:
 intents = discord.Intents.default()
 intents.message_content = True
 bot = commands.Bot(command_prefix="!", intents=intents)
+
+# 비활성화 방지를 위한 태스크
+@tasks.loop(minutes=10)  # 10분마다 실행
+async def keep_alive():
+    """봇을 활성 상태로 유지하는 태스크"""
+    try:
+        # 간단한 로그 출력으로 봇이 살아있음을 확인
+        logger.info("봇이 활성 상태를 유지하고 있습니다...")
+        
+        # 선택사항: 특정 채널에 핑 메시지 보내기 (원하지 않으면 주석 처리)
+        # channel_id = 123456789  # 여기에 채널 ID 입력
+        # channel = bot.get_channel(channel_id)
+        # if channel:
+        #     await channel.send("봇이 활성 상태입니다! 🤖")
+            
+    except Exception as e:
+        logger.error(f"keep_alive 태스크 오류: {e}")
+
+@keep_alive.before_loop
+async def before_keep_alive():
+    """봇이 준비될 때까지 대기"""
+    await bot.wait_until_ready()
 
 
 class RegisterModal(Modal):
@@ -282,8 +305,8 @@ class MatchView(View):
 
 @bot.event
 async def on_ready():
-    logger.info(f"{bot.user} 봇이 준비되었습니다.")
-    logger.info(f"봇이 {len(bot.guilds)}개의 서버에서 실행 중입니다.")
+    print(f"{bot.user} 봇이 준비되었습니다.")
+    keep_alive.start()
 
 
 @bot.command()
