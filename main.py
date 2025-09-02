@@ -5,7 +5,6 @@ import random
 import os
 from dotenv import load_dotenv
 import logging
-from aiohttp import web
 import asyncio
 
 # 로깅 설정
@@ -24,16 +23,8 @@ intents = discord.Intents.default()
 intents.message_content = True
 bot = commands.Bot(command_prefix="!", intents=intents)
 
-# 간단한 웹 서버 (핑용)
-app = web.Application()
-
-async def handle_ping(request):
-    return web.Response(text="pong")
-
-app.router.add_get('/ping', handle_ping)
-
 # 비활성화 방지를 위한 태스크
-@tasks.loop(minutes=10)  # 10분마다 실행
+@tasks.loop(minutes=30)  # 30분마다 실행 (Discord API 부하 감소)
 async def keep_alive():
     """봇을 활성 상태로 유지하는 태스크"""
     try:
@@ -308,8 +299,7 @@ class MatchView(View):
 
 @bot.event
 async def on_ready():
-    logger.info(f"{bot.user} 봇이 준비되었습니다.")
-    logger.info(f"봇이 {len(bot.guilds)}개의 서버에서 실행 중입니다.")
+    print(f"{bot.user} 봇이 준비되었습니다.")
     keep_alive.start()
 
 
@@ -319,18 +309,4 @@ async def match(ctx):
     await ctx.send("참가자 등록 후 팀 짜기를 눌러주세요.", view=view)
 
 
-# 웹 서버와 봇을 함께 실행
-async def main():
-    # 웹 서버 시작
-    runner = web.AppRunner(app)
-    await runner.setup()
-    port = int(os.environ.get('PORT', 8080))
-    site = web.TCPSite(runner, '0.0.0.0', port)
-    await site.start()
-    logger.info(f"웹 서버가 포트 {port}에서 시작되었습니다.")
-    
-    # 봇 실행
-    await bot.start(TOKEN)
-
-if __name__ == "__main__":
-    asyncio.run(main())
+bot.run(TOKEN)
